@@ -2,4 +2,6 @@ interval-in-seconds: 300
 first-retry-after-error-in-seconds: 60
 source-directory: example
 file-determination-by-date: false
-destination-url: http://localhost:4200/printer
+aws-profile: sensor
+aws-api-gateway-destination-url: <url>
+aws-retention-period-in-hours: 336

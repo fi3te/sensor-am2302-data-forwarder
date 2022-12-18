@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/aws"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/config"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/control"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/domain"
@@ -18,6 +19,7 @@ const (
 )
 
 var cfg *config.Config
+var awsCfg *aws.AwsConfig
 
 func main() {
 	log.Println("Reading configuration...")
@@ -30,8 +32,15 @@ func main() {
 	log.Println("Interval: " + interval.String())
 	log.Println("First retry after error: " + cfg.FirstRetryAfterError().String())
 	log.Println("Source directory: " + cfg.SourceDirectory)
-	log.Println("FileDeterminationByDate: " + strconv.FormatBool(cfg.FileDeterminationByDate))
-	log.Println("Destination url: " + cfg.DestinationUrl)
+	log.Println("File determination by date: " + strconv.FormatBool(cfg.FileDeterminationByDate))
+	log.Println("AWS profile: " + cfg.AwsProfile)
+	log.Println("AWS API Gateway destination url: " + cfg.AwsApiGatewayDestinationUrl)
+	log.Println("AWS retention period: " + cfg.RetentionPeriod().String())
+
+	awsCfg, err = aws.InitConfig(cfg.AwsProfile, cfg.AwsApiGatewayDestinationUrl)
+	if err != nil {
+		panic(err)
+	}
 
 	stopTickerChan := make(chan bool)
 
@@ -50,7 +59,7 @@ func task(ticker *control.StatefulTicker, t time.Time) {
 	if err != nil {
 		log.Println(err)
 		if interval == ticker.InitialInterval {
-			ticker.Reset(time.Duration(cfg.FirstRetryAfterErrorInSeconds * int(time.Second)))
+			ticker.Reset(cfg.FirstRetryAfterError())
 		} else {
 			ticker.Reset(interval * 2)
 		}
@@ -61,30 +70,32 @@ func task(ticker *control.StatefulTicker, t time.Time) {
 }
 
 func forwardData() error {
-	filePath, err := determineFilePath()
+	file, err := determineFile()
 	if err != nil {
 		return err
 	}
 
-	content, err := io.ReadLastLine(filePath, charactersToRead)
+	line, err := io.ReadLastLine(file.FilePath, charactersToRead)
 	if err != nil {
 		return err
 	}
 
-	dataPoint, err := domain.Parse(content)
+	dataPoint, err := domain.Parse(line)
 	if err != nil {
 		return err
 	}
 
-	_, err = io.HttpPostJson(cfg.DestinationUrl, *dataPoint)
+	date := file.FileNameWithoutExtension()
+	ttl := int(time.Now().Add(cfg.RetentionPeriod()).Unix())
+	err = aws.SendToApiGateway(awsCfg, date, ttl, dataPoint)
 
-	return nil
+	return err
 }
 
-func determineFilePath() (string, error) {
+func determineFile() (*io.File, error) {
 	if cfg.FileDeterminationByDate {
-		return io.DetermineFilePathByDate(cfg.SourceDirectory)
+		return io.DetermineFileByDate(cfg.SourceDirectory)
 	} else {
-		return io.DetermineFilePathByOrder(cfg.SourceDirectory)
+		return io.DetermineFileByOrder(cfg.SourceDirectory)
 	}
 }

@@ -4,10 +4,11 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 )
 
-func ReadLastLine(filePath string, charactersToRead int) (string, error) {
+func ReadLastLine(filePath string, charactersToRead int) (line string, err error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err
@@ -41,7 +42,7 @@ func ReadLastLine(filePath string, charactersToRead int) (string, error) {
 	return lastCompleteLine(lineBuf)
 }
 
-func lastCompleteLine(lineBuf []byte) (string, error) {
+func lastCompleteLine(lineBuf []byte) (line string, err error) {
 	endIndex := -1
 	for i := len(lineBuf) - 1; i >= 0; i-- {
 		value := lineBuf[i]
@@ -70,31 +71,35 @@ func isLineBreak(char byte) bool {
 	return char == 10 || char == 13
 }
 
-func DetermineFilePathByDate(directory string) (string, error) {
+func DetermineFileByDate(directory string) (*File, error) {
 	time := time.Now()
 	fileName := time.Format("2006-01-02") + ".txt"
 	filePath := filepath.Join(directory, fileName)
 	_, err := os.Stat(filePath)
 	if err != nil {
-		return "", err
+		return nil, err
 	} else {
-		return filePath, nil
+		return &File{FilePath: filePath, FileName: fileName}, nil
 	}
 }
 
-func DetermineFilePathByOrder(directory string) (string, error) {
+func DetermineFileByOrder(directory string) (*File, error) {
 	files, err := os.ReadDir(directory)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+
+	fileNameFormat, _ := regexp.Compile("\\d{4}-\\d{2}-\\d{2}\\.txt")
 
 	last := len(files) - 1
 	for i := range files {
 		file := files[last-i]
-		if file.Type().IsRegular() {
-			return filepath.Join(directory, file.Name()), nil
+		fileName := file.Name()
+		if file.Type().IsRegular() && fileNameFormat.MatchString(fileName) {
+			filePath := filepath.Join(directory, fileName)
+			return &File{FilePath: filePath, FileName: fileName}, nil
 		}
 	}
 
-	return "", errors.New("No regular file found in directory")
+	return nil, errors.New("No regular file found in directory!")
 }
