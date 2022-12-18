@@ -6,13 +6,13 @@ import (
 )
 
 type Config struct {
-	IntervalInSeconds             int    `yaml:"interval-in-seconds"`
-	FirstRetryAfterErrorInSeconds int    `yaml:"first-retry-after-error-in-seconds"`
+	IntervalInSeconds             int64  `yaml:"interval-in-seconds"`
+	FirstRetryAfterErrorInSeconds int64  `yaml:"first-retry-after-error-in-seconds"`
 	SourceDirectory               string `yaml:"source-directory"`
 	FileDeterminationByDate       bool   `yaml:"file-determination-by-date"`
 	AwsProfile                    string `yaml:"aws-profile"`
 	AwsApiGatewayDestinationUrl   string `yaml:"aws-api-gateway-destination-url"`
-	AwsRetentionPeriodInHours     int    `yaml:"aws-retention-period-in-hours"`
+	AwsRetentionPeriodInHours     int64  `yaml:"aws-retention-period-in-hours"`
 }
 
 func (cfg *Config) validate() error {
@@ -49,6 +49,6 @@ func (cfg *Config) RetentionPeriod() time.Duration {
 	return intToDuration(cfg.AwsRetentionPeriodInHours, time.Hour)
 }
 
-func intToDuration(value int, unit time.Duration) time.Duration {
-	return time.Duration(value * int(unit))
+func intToDuration(value int64, unit time.Duration) time.Duration {
+	return time.Duration(value * int64(unit))
 }
