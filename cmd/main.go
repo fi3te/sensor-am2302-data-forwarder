@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/aws"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/config"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/control"
+	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/destination"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/domain"
 	"github.com/fi3te/sensor-am2302-data-forwarder/pkg/io"
 )
@@ -18,8 +18,8 @@ const (
 	charactersToRead     int = expectedLineSize + additionalCharacters
 )
 
-var cfg *config.Config
-var awsCfg *aws.AwsConfig
+var cfg *config.AppConfig
+var forwarder destination.Forwarder
 
 func main() {
 	log.Println("Reading configuration...")
@@ -33,11 +33,9 @@ func main() {
 	log.Println("First retry after error: " + cfg.FirstRetryAfterError().String())
 	log.Println("Source directory: " + cfg.SourceDirectory)
 	log.Println("File determination by date: " + strconv.FormatBool(cfg.FileDeterminationByDate))
-	log.Println("AWS profile: " + cfg.AwsProfile)
-	log.Println("AWS API Gateway destination url: " + cfg.AwsApiGatewayDestinationUrl)
-	log.Println("AWS retention period: " + cfg.RetentionPeriod().String())
+	log.Println("Retention period: " + cfg.RetentionPeriod().String())
 
-	awsCfg, err = aws.InitConfig(cfg.AwsProfile, cfg.AwsApiGatewayDestinationUrl)
+	forwarder, err = destination.NewForwarder(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -87,7 +85,7 @@ func forwardData() error {
 
 	date := file.FileNameWithoutExtension()
 	ttl := int(time.Now().Add(cfg.RetentionPeriod()).Unix())
-	err = aws.SendToApiGateway(awsCfg, date, ttl, dataPoint)
+	err = forwarder.Forward(date, ttl, dataPoint)
 
 	return err
 }
