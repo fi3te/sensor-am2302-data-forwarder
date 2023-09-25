@@ -3,7 +3,15 @@ first-retry-after-error-in-seconds: 60
 source-directory: example
 file-determination-by-date: false
 retention-period-in-hours: 336
-http:
+# http:
+#   url: <url>
+#   method: POST
+#   expected-status: 201
+ntfy:
   url: <url>
-  method: POST
-  expected-status: 201
+  topic: test
+  title-template: "%s Temperature and humidity"
+  message-template: "%.1f°C  %.1f%%"
+  tags:
+   - thermometer
+   - droplet

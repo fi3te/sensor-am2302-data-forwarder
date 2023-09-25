@@ -86,6 +86,30 @@ func (cfg *AwsConfig) validate() error {
 	return nil
 }
 
+type NtfyConfig struct {
+	Url             string   `yaml:"url"`
+	Topic           string   `yaml:"topic"`
+	TitleTemplate   string   `yaml:"title-template"`
+	MessageTemplate string   `yaml:"message-template"`
+	Tags            []string `yaml:"tags"`
+}
+
+func (cfg *NtfyConfig) validate() error {
+	if cfg.Url == "" {
+		return errRequired("ntfy url")
+	}
+	if cfg.Topic == "" {
+		return errRequired("ntfy topic")
+	}
+	if cfg.TitleTemplate == "" {
+		return errRequired("ntfy title template")
+	}
+	if cfg.MessageTemplate == "" {
+		return errRequired("ntfy message template")
+	}
+	return nil
+}
+
 type AppConfig struct {
 	IntervalInSeconds             int64            `yaml:"interval-in-seconds"`
 	FirstRetryAfterErrorInSeconds int64            `yaml:"first-retry-after-error-in-seconds"`
@@ -94,6 +118,7 @@ type AppConfig struct {
 	RetentionPeriodInHours        int64            `yaml:"retention-period-in-hours"`
 	Aws                           *AwsConfig       `yaml:"aws"`
 	Http                          *PlainHttpConfig `yaml:"http"`
+	Ntfy                          *NtfyConfig      `yaml:"ntfy"`
 }
 
 func (cfg *AppConfig) validate() error {
@@ -110,14 +135,17 @@ func (cfg *AppConfig) validate() error {
 		return errGtZero("retention period in hours")
 	}
 
-	destinations := count(cfg.Aws != nil, cfg.Http != nil)
+	destinations := count(cfg.Aws != nil, cfg.Http != nil, cfg.Ntfy != nil)
 	if destinations != 1 {
 		return fmt.Errorf("only exactly one destination at a time is supported (specified: %d)", destinations)
 	}
 	if cfg.Aws != nil {
 		return cfg.Aws.validate()
 	}
-	return cfg.Http.validate()
+	if cfg.Http != nil {
+		return cfg.Http.validate()
+	}
+	return cfg.Ntfy.validate()
 }
 
 func (cfg *AppConfig) Interval() time.Duration {

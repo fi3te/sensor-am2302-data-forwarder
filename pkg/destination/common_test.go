@@ -7,10 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBuildJsonBuffer(t *testing.T) {
+func TestEncodeDataPointAsJson(t *testing.T) {
 	dataPoint := domain.DataPoint{Time: "00:00:00", Temperature: 20.0, Humidity: 50.0}
 
-	body, err := buildJsonBuffer("2023-09-26", 0, &dataPoint)
+	body, err := encodeDataPointAsJson("2023-09-26", 0, &dataPoint)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "{\"date\":\"2023-09-26\",\"time\":\"00:00:00\",\"temperature\":20,\"humidity\":50,\"ttl\":0}\n", body.String())

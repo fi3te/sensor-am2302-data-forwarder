@@ -20,6 +20,9 @@ func NewForwarder(appConfig *config.AppConfig) (Forwarder, error) {
 	if appConfig.Http != nil {
 		return NewHttpForwarder(appConfig.Http)
 	}
+	if appConfig.Ntfy != nil {
+		return NewNtfyForwarder(appConfig.Ntfy)
+	}
 	return nil, errors.New("no forwarder configured")
 }
 
@@ -41,10 +44,14 @@ func buildDataPointDto(date string, ttl int, dataPoint *domain.DataPoint) dataPo
 	}
 }
 
-func buildJsonBuffer(date string, ttl int, dataPoint *domain.DataPoint) (*bytes.Buffer, error) {
+func encodeDataPointAsJson(date string, ttl int, dataPoint *domain.DataPoint) (*bytes.Buffer, error) {
 	dto := buildDataPointDto(date, ttl, dataPoint)
+	return encodeAsJson(dto)
+}
+
+func encodeAsJson(v any) (*bytes.Buffer, error) {
 	var buf bytes.Buffer
-	err := json.NewEncoder(&buf).Encode(dto)
+	err := json.NewEncoder(&buf).Encode(v)
 	if err != nil {
 		return nil, err
 	}

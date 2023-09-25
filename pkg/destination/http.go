@@ -35,7 +35,7 @@ func (f *HttpForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoin
 // general functionality
 
 func buildRequest(method string, url string, date string, ttl int, dataPoint *domain.DataPoint) (*http.Request, []byte, error) {
-	buf, err := buildJsonBuffer(date, ttl, dataPoint)
+	buf, err := encodeDataPointAsJson(date, ttl, dataPoint)
 	if err != nil {
 		return nil, nil, err
 	}
