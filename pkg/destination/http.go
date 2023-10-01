@@ -23,7 +23,7 @@ func NewHttpForwarder(appConfig *appConfig.PlainHttpConfig) (*HttpForwarder, err
 	return &HttpForwarder{appConfig.Url, appConfig.Method, appConfig.ExpectedStatus, authentication}, nil
 }
 
-func (f *HttpForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoint) error {
+func (f *HttpForwarder) Forward(date string, ttl int64, dataPoint *domain.DataPoint) error {
 	req, _, err := buildRequest(f.method, f.url, date, ttl, dataPoint)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (f *HttpForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoin
 
 // general functionality
 
-func buildRequest(method string, url string, date string, ttl int, dataPoint *domain.DataPoint) (*http.Request, []byte, error) {
+func buildRequest(method string, url string, date string, ttl int64, dataPoint *domain.DataPoint) (*http.Request, []byte, error) {
 	buf, err := encodeDataPointAsJson(date, ttl, dataPoint)
 	if err != nil {
 		return nil, nil, err

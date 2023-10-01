@@ -10,7 +10,7 @@ import (
 )
 
 type Forwarder interface {
-	Forward(date string, ttl int, dataPoint *domain.DataPoint) error
+	Forward(date string, ttl int64, dataPoint *domain.DataPoint) error
 }
 
 func NewForwarder(appConfig *config.AppConfig) (Forwarder, error) {
@@ -31,10 +31,10 @@ type dataPointDto struct {
 	Time        string  `json:"time"`
 	Temperature float64 `json:"temperature"`
 	Humidity    float64 `json:"humidity"`
-	Ttl         int     `json:"ttl"`
+	Ttl         int64   `json:"ttl"`
 }
 
-func buildDataPointDto(date string, ttl int, dataPoint *domain.DataPoint) dataPointDto {
+func buildDataPointDto(date string, ttl int64, dataPoint *domain.DataPoint) dataPointDto {
 	return dataPointDto{
 		Date:        date,
 		Time:        dataPoint.Time,
@@ -44,7 +44,7 @@ func buildDataPointDto(date string, ttl int, dataPoint *domain.DataPoint) dataPo
 	}
 }
 
-func encodeDataPointAsJson(date string, ttl int, dataPoint *domain.DataPoint) (*bytes.Buffer, error) {
+func encodeDataPointAsJson(date string, ttl int64, dataPoint *domain.DataPoint) (*bytes.Buffer, error) {
 	dto := buildDataPointDto(date, ttl, dataPoint)
 	return encodeAsJson(dto)
 }

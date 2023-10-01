@@ -66,10 +66,10 @@ func task(ticker *control.StatefulTicker, t time.Time, ls *logging.LogSetup) {
 		} else {
 			newInterval = interval * 2
 		}
-		ls.Debug.Printf("Waiting for %s after error...\n", newInterval)
+		ls.Info.Printf("Waiting for %s after error...\n", newInterval)
 		ticker.Reset(newInterval)
 	} else if interval != ticker.InitialInterval {
-		ls.Debug.Println("Resetting interval to initial value...")
+		ls.Info.Println("Resetting interval to initial value...")
 		ticker.ResetToInitialInterval()
 	}
 	ls.Debug.Println(">>")
@@ -93,8 +93,8 @@ func forwardData(ls *logging.LogSetup) error {
 	}
 
 	date := file.FileNameWithoutExtension()
-	ttl := int(time.Now().Add(cfg.RetentionPeriod()).Unix())
-	ls.Debug.Println("Forwarding data...")
+	ttl := time.Now().Add(cfg.RetentionPeriod()).Unix()
+	ls.Info.Printf("Forwarding data with %T...\n", forwarder)
 	err = forwarder.Forward(date, ttl, dataPoint)
 
 	return err

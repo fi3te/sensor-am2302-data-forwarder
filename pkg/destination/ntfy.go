@@ -33,7 +33,7 @@ func NewNtfyForwarder(appConfig *appConfig.NtfyConfig) (*NtfyForwarder, error) {
 	}, nil
 }
 
-func (f *NtfyForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoint) error {
+func (f *NtfyForwarder) Forward(date string, ttl int64, dataPoint *domain.DataPoint) error {
 	buf, err := encodeAsJson(ntfyMessage{
 		Topic:   f.topic,
 		Title:   fmt.Sprintf(f.titleTemplate, dataPoint.Time[0:5]),

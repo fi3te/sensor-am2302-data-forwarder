@@ -5,8 +5,10 @@ file-determination-by-date: false
 retention-period-in-hours: 336
 # http:
 #   url: <url>
-#   method: POST
-#   expected-status: 201
+#   method: PUT
+#   expected-status: 204
+#   basic-auth-username: <username>
+#   basic-auth-password: <password>
 ntfy:
   url: <url>
   topic: <topic>

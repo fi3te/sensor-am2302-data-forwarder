@@ -31,7 +31,7 @@ func NewAwsForwarder(appConfig *appConfig.AwsConfig) (*AwsForwarder, error) {
 	return &AwsForwarder{appConfig.Url, appConfig.Method, appConfig.ExpectedStatus, &awsConfig, credentialsCache}, err
 }
 
-func (f *AwsForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoint) error {
+func (f *AwsForwarder) Forward(date string, ttl int64, dataPoint *domain.DataPoint) error {
 	req, err := f.buildRequest(date, ttl, dataPoint)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func (f *AwsForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoint
 	return sendRequest(req, f.expectedStatus)
 }
 
-func (f *AwsForwarder) buildRequest(date string, ttl int, dataPoint *domain.DataPoint) (*http.Request, error) {
+func (f *AwsForwarder) buildRequest(date string, ttl int64, dataPoint *domain.DataPoint) (*http.Request, error) {
 	credentials, err := f.credentialsCache.Retrieve(context.TODO())
 	if err != nil {
 		return nil, err
