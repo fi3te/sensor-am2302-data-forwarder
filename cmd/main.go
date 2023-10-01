@@ -22,7 +22,7 @@ var cfg *config.AppConfig
 var forwarder destination.Forwarder
 
 func main() {
-	ls := logging.New(logging.LevelDebug)
+	ls := logging.New(logging.LevelInfo)
 
 	ls.Info.Println("Reading configuration...")
 	var err error

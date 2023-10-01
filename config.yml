@@ -1,6 +1,6 @@
 interval-in-seconds: 300
 first-retry-after-error-in-seconds: 60
-source-directory: example
+source-directory: data
 file-determination-by-date: false
 retention-period-in-hours: 336
 # http:
@@ -9,7 +9,7 @@ retention-period-in-hours: 336
 #   expected-status: 201
 ntfy:
   url: <url>
-  topic: test
+  topic: <topic>
   title-template: "%s Temperature and humidity"
   message-template: "%.1f°C  %.1f%%"
   tags:

@@ -36,7 +36,7 @@ func NewNtfyForwarder(appConfig *appConfig.NtfyConfig) (*NtfyForwarder, error) {
 func (f *NtfyForwarder) Forward(date string, ttl int, dataPoint *domain.DataPoint) error {
 	buf, err := encodeAsJson(ntfyMessage{
 		Topic:   f.topic,
-		Title:   fmt.Sprintf(f.titleTemplate, dataPoint.Time),
+		Title:   fmt.Sprintf(f.titleTemplate, dataPoint.Time[0:5]),
 		Message: fmt.Sprintf(f.messageTemplate, dataPoint.Temperature, dataPoint.Humidity),
 		Tags:    f.tags,
 	})
