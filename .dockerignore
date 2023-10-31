@@ -1,0 +1,7 @@
+.git/
+.vscode/
+data/
+config.yml
+Dockerfile*
+docker-compose*
+sensor-am2302-data-forwarder*

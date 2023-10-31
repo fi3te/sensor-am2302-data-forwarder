@@ -8,6 +8,5 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o main ./cmd/main.go
 FROM gcr.io/distroless/static-debian12 as runner
 WORKDIR /app
 COPY --from=builder /app/main ./main
-COPY ./config.yml /app/
 USER nonroot:nonroot
 ENTRYPOINT ["/app/main"]

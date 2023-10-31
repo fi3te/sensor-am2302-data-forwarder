@@ -8,3 +8,4 @@ services:
       dockerfile: Dockerfile.amd64
     volumes:
       - ./data:/app/data
+      - ./config.yml:/app/config.yml
